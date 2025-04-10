@@ -26,13 +26,27 @@ jobs:
       - name: Build website
         run: npm run build
       - name: Upload artifacts
+      # Here we are creating and uploading artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist-files
           path: dist
+          # Here the path refers to the files or folders we want to put inside the artifacts
+          # We can put multiple files as well
+          # path: |
+          #   dist
+          #   package.json
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: get artifacts
+      # this is used to download the artifacts uploaded in the previous steps
+        uses: actions/download-artifact@v4
+        with:
+          # used to select which artifact to download
+          name: dist-files
+      - name: list artifacts
+        run: ls
       - name: Deploy
         run: echo "Deploying..."
