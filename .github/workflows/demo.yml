@@ -18,6 +18,10 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    # here we are defining this to be able to access the output values
+    outputs:
+      # so here we are setting up an output for a step and referencing that output here for setting an output for the overall job
+      script-file: ${{ steps.publish.outputs.script-file }}
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -25,6 +29,13 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
+      - name: Publish JS filename
+      # give an id to this step so that it can be referenced
+        id: publish
+      # here script-file is the name of this step's output
+      # we are setting here output as an key-value pair, so script-file here is a key and the 'js file name' which we are trying to fetch will be it's value
+      # so here we are writing some output in an output file managed by github
+        run: find dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
       - name: Upload artifacts
       # Here we are creating and uploading artifacts
         uses: actions/upload-artifact@v4
@@ -48,5 +59,8 @@ jobs:
           name: dist-files
       - name: list artifacts
         run: ls
+      - name: output filename
+      # here 'needs' contains the output of all the jobs
+        run: echo "${{ needs.build.outputs.script-file }}"
       - name: Deploy
         run: echo "Deploying..."
